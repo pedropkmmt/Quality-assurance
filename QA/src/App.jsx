@@ -453,6 +453,7 @@ const UploadsView = () => {
   };
 
   const extractTranscriptFromVcon = (json) => {
+
     if (!json || !json.dialog) return null;
 
     return json.dialog.map((entry, i) => ({
