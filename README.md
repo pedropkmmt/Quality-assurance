@@ -1,6 +1,3 @@
-Sure! Here's a clean and informative `README.md` for your `CallSense QA` React app:
-
----
 
 # 📞 CallSense QA
 
