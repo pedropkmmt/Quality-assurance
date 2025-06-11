@@ -389,7 +389,127 @@ Format your response clearly with headers and bullet points.`;
         </div>
       </div>
     </div>
+    
   );
+const UploadsView = () => {
+  const [vconData, setVconData] = useState('');
+  const [vconTranscript, setVconTranscript] = useState(null);
+  const [mp3File, setMp3File] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [transcriptResult, setTranscriptResult] = useState('');
+  const [isTranscribing, setIsTranscribing] = useState(false);
+
+  const handleMp3Change = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setMp3File(file);
+    setPreviewUrl(URL.createObjectURL(file));
+    transcribeAudio(file);
+  };
+
+  const transcribeAudio = async (file) => {
+    setIsTranscribing(true);
+    setTranscriptResult('');
+    
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('model', 'whisper-1'); // For OpenAI
+      formData.append('response_format', 'text'); // optional
+
+      const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`, // reuse your Groq/OpenAI key
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.text();
+      setTranscriptResult(result);
+    } catch (err) {
+      setTranscriptResult(`Transcription failed: ${err.message}`);
+    } finally {
+      setIsTranscribing(false);
+    }
+  };
+
+  const handleJsonChange = (e) => {
+    try {
+      const parsed = JSON.parse(e.target.value);
+      setVconData(JSON.stringify(parsed, null, 2));
+
+      const transcript = extractTranscriptFromVcon(parsed);
+      setVconTranscript(transcript);
+    } catch (err) {
+      setVconData('Invalid JSON');
+      setVconTranscript(null);
+    }
+  };
+
+  const extractTranscriptFromVcon = (json) => {
+    if (!json || !json.dialog) return null;
+
+    return json.dialog.map((entry, i) => ({
+      speaker: entry.speaker || `Speaker ${i + 1}`,
+      content: entry.content || '',
+      time: entry.timestamp || ''
+    }));
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-white p-6 rounded-lg border">
+        <h2 className="text-lg font-semibold mb-4">Upload VCon JSON & MP3</h2>
+        <div className="mb-6">
+          <label className="block font-medium text-gray-700 mb-2">Upload MP3 File</label>
+          <input type="file" accept="audio/mp3" onChange={handleMp3Change} />
+          {previewUrl && (
+            <div className="mt-4">
+              <audio controls src={previewUrl} className="w-full" />
+            </div>
+          )}
+
+          {isTranscribing && (
+            <p className="mt-2 text-blue-600 text-sm">Transcribing with Whisper...</p>
+          )}
+
+          {transcriptResult && (
+            <div className="mt-4 p-4 bg-gray-50 rounded border text-sm whitespace-pre-wrap">
+              <h3 className="font-semibold mb-2">Transcription Result</h3>
+              {transcriptResult}
+            </div>
+          )}
+        </div>
+        <div>
+          <label className="block font-medium text-gray-700 mb-2">Paste VCon JSON</label>
+          <textarea
+            rows={10}
+            className="w-full border p-2 rounded"
+            placeholder='Paste your VCon JSON here...'
+            onChange={handleJsonChange}
+          />
+          {vconTranscript && (
+            <div className="mt-4 bg-gray-50 border p-4 rounded text-sm space-y-2">
+              <h3 className="font-semibold mb-2">Extracted Transcript</h3>
+              {vconTranscript.map((line, index) => (
+                <div key={index}>
+                  <span className="font-medium">{line.speaker}:</span> {line.content}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -407,26 +527,30 @@ Format your response clearly with headers and bullet points.`;
 
       <div className="max-w-7xl mx-auto px-4 py-6">
         <nav className="flex space-x-6 mb-6">
-          {[
-            { id: 'dashboard', label: 'Dashboard' },
-            { id: 'calls', label: 'Calls' },
-            { id: 'ai-analysis', label: 'AI Analysis' }
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setSelectedTab(tab.id)}
-              className={`px-4 py-2 rounded font-medium ${
-                selectedTab === tab.id
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </nav>
+  {[
+    { id: 'dashboard', label: 'Dashboard' },
+    { id: 'uploads', label: 'Uploads' } ,
+    { id: 'calls', label: 'Calls' },
+    { id: 'ai-analysis', label: 'AI Analysis' },
+    
+  ].map((tab) => (
+    <button
+      key={tab.id}
+      onClick={() => setSelectedTab(tab.id)}
+      className={`px-4 py-2 rounded font-medium ${
+        selectedTab === tab.id
+          ? 'bg-blue-100 text-blue-700'
+          : 'text-gray-600 hover:text-gray-900'
+      }`}
+    >
+      {tab.label}
+    </button>
+  ))}
+</nav>
+
 
         {selectedTab === 'dashboard' && <DashboardView />}
+        {selectedTab === 'uploads' && <UploadsView />}
         {selectedTab === 'calls' && <CallsView />}
         {selectedTab === 'ai-analysis' && <AIAnalysisView />}
       </div>
