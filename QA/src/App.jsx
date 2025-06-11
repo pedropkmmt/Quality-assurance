@@ -7,7 +7,7 @@ const CallSenseQA = () => {
   const [aiAnalysis, setAiAnalysis] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [apiKey, setApiKey] = useState('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');
+  const [apiKey, setApiKey] = useState('');
   const [showSettings, setShowSettings] = useState(false);
   const [error, setError] = useState('');
 
