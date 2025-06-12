@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Phone, Users, TrendingUp, MessageSquare, Search, Star, Clock, CheckCircle, AlertTriangle, Settings, Upload, FileText, Music } from 'lucide-react';
+import jsonData from './data.json';
 
 const CallSenseQA = () => {
   const [selectedTab, setSelectedTab] = useState('dashboard');
@@ -11,42 +12,28 @@ const CallSenseQA = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [error, setError] = useState('');
 
-  const callData = [
-    {
-      id: '1',
-      customer: 'Julie Kelly',
-      agent: 'David Rogers',
-      date: '2025-05-18',
-      duration: '43s',
-      type: 'Wrong Item Order',
-      status: 'Resolved',
-      score: 92,
-      transcript: "Hello, this is David Rogers please?\n\nHi David, my name is Julie Kelly.\n\nThank you, Julie. How can I assist you today?\n\nI received the wrong item in my order, and I wanted to get this sorted out.\n\nI'm sorry to hear that, Julie. Let's get this resolved for you. Could you provide me with the order number, please?\n\nSure, the order number is two three four five.\n\nThank you. Could you also let me know the item you received and the item you were expecting?\n\nI received a yacht anchor, but I was expecting a navigation system.\n\nI apologize for the mix-up, Julie. I will ensure we get the correct navigation system sent to you right away.\n\nThank you very much for bringing this to our attention, Julie. We appreciate your patience and trust in us. Have a great day!"
-    },
-    {
-      id: '2',
-      customer: 'Patricia Bell',
-      agent: 'Louis James',
-      date: '2025-05-18',
-      duration: '59s',
-      type: 'Subscription Update',
-      status: 'Resolved',
-      score: 98,
-      transcript: "Hello, thank you for calling Aquidneck Yacht Brokers. My name is Louis James. May I have the pleasure of knowing your name?\n\nHi Louis, my name is Patricia Bell. I'm happy to speak with you today.\n\nIt's great to meet you, Patricia! How can I assist you with your subscription today?\n\nI'm delighted with the services so far and just needed some help with updating some information.\n\nI'm glad to hear that you're enjoying our services! Could you please let me know your subscription ID so I can access your information?\n\nYes, of course. My subscription ID is A B C one two three four.\n\nThank you, Patricia. For security purposes, could you also confirm your registered email address?\n\nSure, my email address is patricia.bell@example.com.\n\nPerfect, everything matches up. Your details have been updated successfully. Is there anything else I can help you with today?\n\nNo, that's all. Thank you, Louis. You have been very helpful.\n\nYou're welcome, Patricia! Thank you for your time and for being a valued customer. Have a wonderful day!"
-    },
-     {
-      id: '3',
-      customer: 'Ann Wilson',
-      agent: 'Vincent Bailey',
-      date: '2025-05-18',
-      duration: '56.208',
-      type: 'Returns',
-      status: 'Resolved',
-      score: 98,
-      transcript: "Hello, thank you for contacting Aquidneck Yacht Brokers. My name is Vincent Bailey. May I know your name, please?\n\nHi Vincent, my name is Ann Wilson.\n\nHello Ann, it's nice to meet you. How can I assist you today?\n\nWell, I'm feeling a bit sad because I need to make a return.\n\nI'm sorry to hear that, Ann. Let's get this sorted out for you. Could you provide me with your order number?\n\nSure, it's two zero two five eight four.\n\nThank you, Ann. Could you also confirm the email address you used for the order?\n\nYes, it's ann.wilson@email.com.\n\nGreat, thank you for the information. I'll process your return request now. Please allow me a moment.\n\nAnn, your return has been processed. You will receive a confirmation email shortly. Thank you for your patience.\n\nThank you, Vincent. I appreciate your help.\n\nYou're welcome, Ann. Thank you for contacting Aquidneck Yacht Brokers. If you need further assistance, feel free to reach out. Have a great day!"
-    }
+  const callData = jsonData.map((item, index) => {
+  const customer = item.parties.find(p => p.role === 'customer')?.name || 'Unknown';
+  const agent = item.parties.find(p => p.role === 'agent')?.name || 'Unknown';
+  const transcript = item.analysis.find(a => a.type === 'transcript')?.body?.transcript || '';
+  const duration = item.dialog?.[0]?.duration ? `${Math.round(item.dialog[0].duration)}s` : 'Unknown';
+  const type = 'General Inquiry'; 
+  const score = 90 + (index % 10); 
+  const status = 'Resolved'; 
+  const date = new Date(item.created_at).toISOString().slice(0, 10); 
 
-  ];
+  return {
+    id: item.uuid,
+    customer,
+    agent,
+    date,
+    duration,
+    type,
+    status,
+    score,
+    transcript,
+  };
+});
 
   const analyzeCallWithGroq = async (call) => {
     if (!apiKey.trim()) {
