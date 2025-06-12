@@ -144,7 +144,7 @@ Format your response clearly with headers and bullet points.`;
     }
   };
 
-
+  // New function to analyze uploaded content
   const analyzeUploadedContent = async (transcript, metadata = {}) => {
     if (!apiKey.trim()) {
       setError('Please configure your Groq API key in settings');
@@ -458,21 +458,7 @@ Format your response clearly with headers and bullet points.`;
             </div>
           </div>
         )}
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-4 bg-green-50 rounded-lg">
-            <CheckCircle className="h-6 w-6 text-green-600 mb-2" />
-            <h3 className="font-semibold text-green-800">Strengths Identified</h3>
-            <p className="text-sm text-green-700">AI identifies what agents are doing well</p>
-          </div>
-          
-          <div className="p-4 bg-yellow-50 rounded-lg">
-            <AlertTriangle className="h-6 w-6 text-yellow-600 mb-2" />
-            <h3 className="font-semibold text-yellow-800">Improvement Areas</h3>
-            <p className="text-sm text-yellow-700">AI suggests specific areas for growth</p>
-          </div>
-        </div>
-
+    
         <div className="mt-6 p-4 bg-blue-50 rounded-lg">
           <h3 className="font-semibold text-blue-800 mb-2">How to Use:</h3>
           <ol className="text-sm text-blue-700 space-y-1">
@@ -499,11 +485,11 @@ Format your response clearly with headers and bullet points.`;
       const file = e.target.files[0];
       if (!file) return;
 
-     
+      
       setUploadError('');
       setTranscriptResult('');
       
-   
+      
       if (!file.type.includes('audio')) {
         setUploadError('Please upload a valid audio file (MP3, WAV, etc.)');
         return;
@@ -518,7 +504,7 @@ Format your response clearly with headers and bullet points.`;
       setMp3File(file);
       setPreviewUrl(URL.createObjectURL(file));
       
-     
+      
       simulateTranscription(file);
     };
 
@@ -530,7 +516,7 @@ Format your response clearly with headers and bullet points.`;
         
         await new Promise(resolve => setTimeout(resolve, 3000));
         
-      
+        
         const mockTranscript = `Hello, thank you for calling our customer service. My name is Sarah, how can I help you today?
 
 Hi Sarah, I'm calling about my recent order. I received the wrong item and need to return it.
@@ -578,7 +564,7 @@ Perfect! Have a wonderful day and thank you for choosing our service.`;
     };
 
     const extractTranscriptFromVcon = (json) => {
-     
+      
       if (json.dialog && Array.isArray(json.dialog)) {
         return json.dialog.map((entry, i) => ({
           speaker: entry.speaker || entry.party || `Speaker ${i + 1}`,
@@ -596,7 +582,7 @@ Perfect! Have a wonderful day and thank you for choosing our service.`;
         }];
       }
       
-      
+     
       if (json.conversations && Array.isArray(json.conversations)) {
         return json.conversations.map((entry, i) => ({
           speaker: entry.speaker || `Speaker ${i + 1}`,
@@ -709,7 +695,7 @@ Perfect! Have a wonderful day and thank you for choosing our service.`;
             )}
           </div>
 
-          
+          {/* VCon JSON Upload Section */}
           <div className="p-4 border-2 border-dashed border-gray-300 rounded-lg">
             <div className="flex items-center gap-3 mb-3">
               <FileText className="h-5 w-5 text-purple-600" />
@@ -766,7 +752,7 @@ Perfect! Have a wonderful day and thank you for choosing our service.`;
             )}
           </div>
 
-        
+          {/* Analysis Results Section */}
           {(isAnalyzing || aiAnalysis) && (
             <div className="mt-6 p-4 bg-white border rounded-lg">
               <h3 className="font-semibold mb-3">AI Analysis Results</h3>
@@ -789,34 +775,6 @@ Perfect! Have a wonderful day and thank you for choosing our service.`;
               )}
             </div>
           )}
-
-          
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <h3 className="font-semibold text-blue-800 mb-2">Instructions:</h3>
-            <div className="text-sm text-blue-700 space-y-2">
-              <div className="flex items-start gap-2">
-                <Music className="h-4 w-4 mt-0.5" />
-                <div>
-                  <p className="font-medium">Audio Files:</p>
-                  <p>Upload MP3, WAV, or other audio formats. The system will simulate transcription for demo purposes.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-2">
-                <FileText className="h-4 w-4 mt-0.5" />
-                <div>
-                  <p className="font-medium">VCon JSON:</p>
-                  <p>Paste JSON data with conversation transcripts. Supports various formats including dialog arrays and transcript objects.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-2">
-                <MessageSquare className="h-4 w-4 mt-0.5" />
-                <div>
-                  <p className="font-medium">AI Analysis:</p>
-                  <p>Click "Analyze" to get detailed insights from Groq AI including strengths, improvements, and quality scores.</p>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     );
